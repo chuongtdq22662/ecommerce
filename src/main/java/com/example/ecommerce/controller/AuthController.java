@@ -40,6 +40,7 @@ public class AuthController {
         User user = User.builder()
                 .username(req.getUsername())
                 .password(passwordEncoder.encode(req.getPassword()))
+                .email(req.getEmail())
                 .role("ROLE_USER")
                 .enabled(true)
                 .build();

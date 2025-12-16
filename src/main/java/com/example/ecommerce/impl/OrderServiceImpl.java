@@ -5,6 +5,8 @@ import com.example.ecommerce.dto.OrderItemRequest;
 import com.example.ecommerce.dto.OrderItemResponse;
 import com.example.ecommerce.dto.OrderResponse;
 import com.example.ecommerce.entity.*;
+import com.example.ecommerce.event.OrderCreatedEvent;
+import com.example.ecommerce.event.OrderEventProducer;
 import com.example.ecommerce.exception.NotFoundException;
 import com.example.ecommerce.repository.OrderRepository;
 import com.example.ecommerce.repository.ProductRepository;
@@ -26,13 +28,15 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
+    private final OrderEventProducer producer;
 
     public OrderServiceImpl(OrderRepository orderRepository,
                             ProductRepository productRepository,
-                            UserRepository userRepository) {
+                            UserRepository userRepository, OrderEventProducer producer) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
+        this.producer = producer;
     }
 
     @Override
@@ -86,6 +90,15 @@ public class OrderServiceImpl implements OrderService {
         orderItems.forEach(oi -> oi.setOrder(order));
 
         Order saved = orderRepository.save(order);
+
+        // publish event gửi mail
+        OrderCreatedEvent event = new OrderCreatedEvent(
+                saved.getId(),
+                currentUser.getUsername(),
+                currentUser.getEmail(),
+                saved.getTotalAmount()
+        );
+        producer.publishOrderCreated(event);
 
         return toResponse(saved);
     }
