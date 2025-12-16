@@ -5,6 +5,7 @@ import com.example.ecommerce.dto.ProductResponse;
 import com.example.ecommerce.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,35 +20,40 @@ public class ProductController {
         this.productService = productService;
     }
 
-    // GET /api/products
+    // ✅ Cho phép mọi user đã login (ROLE_USER, ROLE_ADMIN) đều xem danh sách
     @GetMapping
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<List<ProductResponse>> getAll() {
         return ResponseEntity.ok(productService.getAll());
     }
 
-    // GET /api/products/{id}
+    // ✅ Xem chi tiết: cũng cho USER + ADMIN
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<ProductResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(productService.getById(id));
     }
 
-    // POST /api/products
+    // 🔐 Chỉ ADMIN được tạo sản phẩm
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProductResponse> create(@Valid @RequestBody ProductRequest request) {
         ProductResponse created = productService.create(request);
-        return ResponseEntity.ok(created); // sau này có thể đổi sang status 201
+        return ResponseEntity.ok(created);
     }
 
-    // PUT /api/products/{id}
+    // 🔐 Chỉ ADMIN được update
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProductResponse> update(@PathVariable Long id,
                                                   @Valid @RequestBody ProductRequest request) {
         ProductResponse updated = productService.update(id, request);
         return ResponseEntity.ok(updated);
     }
 
-    // DELETE /api/products/{id}
+    // 🔐 Chỉ ADMIN được delete
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         productService.delete(id);
         return ResponseEntity.noContent().build();
