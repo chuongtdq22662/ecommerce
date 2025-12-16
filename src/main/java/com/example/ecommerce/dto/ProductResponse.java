@@ -12,18 +12,20 @@ public class ProductResponse {
     private Integer stock;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String imageUrl;
 
     // constructors
     public ProductResponse() {}
 
     public ProductResponse(Long id, String name, String description,
                            BigDecimal price, Integer stock,
-                           LocalDateTime createdAt, LocalDateTime updatedAt) {
+                           LocalDateTime createdAt, LocalDateTime updatedAt, String imageUrl) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.price = price;
         this.stock = stock;
+        this.imageUrl = imageUrl;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }

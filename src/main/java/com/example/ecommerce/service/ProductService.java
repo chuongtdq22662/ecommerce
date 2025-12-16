@@ -16,4 +16,6 @@ public interface ProductService {
     ProductResponse update(Long id, ProductRequest request);
 
     void delete(Long id);
+
+    ProductResponse updateImageUrl(Long id, String imageUrl);
 }

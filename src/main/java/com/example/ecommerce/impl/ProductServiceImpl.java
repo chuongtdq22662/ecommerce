@@ -72,6 +72,18 @@ public class ProductServiceImpl implements ProductService {
         productRepository.deleteById(id);
     }
 
+    @Override
+    public ProductResponse updateImageUrl(Long id, String imageUrl) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Không tìm thấy sản phẩm với id = " + id));
+
+        product.setImageUrl(imageUrl);
+        product.setUpdatedAt(LocalDateTime.now());
+
+        Product saved = productRepository.save(product);
+        return toResponse(saved);
+    }
+
     // mapping Entity -> Response DTO
     private ProductResponse toResponse(Product p) {
         return new ProductResponse(
@@ -81,7 +93,8 @@ public class ProductServiceImpl implements ProductService {
                 p.getPrice(),
                 p.getStock(),
                 p.getCreatedAt(),
-                p.getUpdatedAt()
+                p.getUpdatedAt(),
+                p.getImageUrl()
         );
     }
 }
