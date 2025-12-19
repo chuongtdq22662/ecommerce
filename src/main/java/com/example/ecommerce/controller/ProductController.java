@@ -1,5 +1,6 @@
 package com.example.ecommerce.controller;
 
+import com.example.ecommerce.dto.PageResponse;
 import com.example.ecommerce.dto.ProductRequest;
 import com.example.ecommerce.dto.ProductResponse;
 import com.example.ecommerce.service.FileStorageService;
@@ -24,11 +25,24 @@ public class ProductController {
         this.fileStorageService = fileStorageService;
     }
 
-    // ✅ Cho phép mọi user đã login (ROLE_USER, ROLE_ADMIN) đều xem danh sách
+//    // ✅ Cho phép mọi user đã login (ROLE_USER, ROLE_ADMIN) đều xem danh sách
+//    @GetMapping
+//    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+//    public ResponseEntity<List<ProductResponse>> getAll() {
+//        return ResponseEntity.ok(productService.getAll());
+//    }
+
     @GetMapping
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
-    public ResponseEntity<List<ProductResponse>> getAll() {
-        return ResponseEntity.ok(productService.getAll());
+    public ResponseEntity<PageResponse<ProductResponse>> search(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) java.math.BigDecimal minPrice,
+            @RequestParam(required = false) java.math.BigDecimal maxPrice,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String sort
+    ) {
+        return ResponseEntity.ok(productService.search(keyword, minPrice, maxPrice, page, size, sort));
     }
 
     // ✅ Xem chi tiết: cũng cho USER + ADMIN

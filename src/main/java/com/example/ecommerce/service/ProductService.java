@@ -1,5 +1,6 @@
 package com.example.ecommerce.service;
 
+import com.example.ecommerce.dto.PageResponse;
 import com.example.ecommerce.dto.ProductRequest;
 import com.example.ecommerce.dto.ProductResponse;
 
@@ -18,4 +19,10 @@ public interface ProductService {
     void delete(Long id);
 
     ProductResponse updateImageUrl(Long id, String imageUrl);
+
+    PageResponse<ProductResponse> search(String keyword,
+                                         java.math.BigDecimal minPrice,
+                                         java.math.BigDecimal maxPrice,
+                                         int page, int size,
+                                         String sort);
 }

@@ -1,13 +1,17 @@
 package com.example.ecommerce.impl;
 
+import com.example.ecommerce.dto.PageResponse;
 import com.example.ecommerce.dto.ProductRequest;
 import com.example.ecommerce.dto.ProductResponse;
 import com.example.ecommerce.entity.Product;
 import com.example.ecommerce.repository.ProductRepository;
 import com.example.ecommerce.service.ProductService;
+import com.example.ecommerce.spec.ProductSpecification;
 import org.springframework.stereotype.Service;
 import com.example.ecommerce.exception.NotFoundException;
+import org.springframework.data.domain.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -82,6 +86,43 @@ public class ProductServiceImpl implements ProductService {
 
         Product saved = productRepository.save(product);
         return toResponse(saved);
+    }
+
+    @Override
+    public PageResponse<ProductResponse> search(String keyword,
+                                                BigDecimal minPrice,
+                                                BigDecimal maxPrice,
+                                                int page, int size,
+                                                String sort) {
+
+        Sort sortObj = Sort.by("id").descending();
+        if (sort != null && !sort.isBlank()) {
+            // sort format: field,dir  (vd: price,asc)
+            String[] parts = sort.split(",");
+            if (parts.length == 2) {
+                String field = parts[0].trim();
+                String dir = parts[1].trim().toLowerCase();
+                sortObj = "asc".equals(dir) ? Sort.by(field).ascending() : Sort.by(field).descending();
+            }
+        }
+
+        Pageable pageable = PageRequest.of(page, size, sortObj);
+
+        var spec = ProductSpecification.keyword(keyword)
+                .and(ProductSpecification.minPrice(minPrice))
+                .and(ProductSpecification.maxPrice(maxPrice));
+
+        Page<Product> result = productRepository.findAll(spec, pageable);
+
+        var items = result.getContent().stream().map(this::toResponse).toList();
+
+        return new PageResponse<>(
+                items,
+                result.getNumber(),
+                result.getSize(),
+                result.getTotalElements(),
+                result.getTotalPages()
+        );
     }
 
     // mapping Entity -> Response DTO
